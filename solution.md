@@ -29,3 +29,28 @@ Some thoughts I had whilst setting up:
 (2) We care about individual questions on specific diagnostic questionnaires, so we need to be able to reliably uniquely identify specific questions, not just particular diagnostic questionnaires. The question is, which parameter should we use as a uid? It seems we have a question string, a question order (the index at which the question appears in the questionnaire), and a symptom that the question is designed to "screen". The latter of the three seems to be the most reliable option: the first two are possibly more susceptible to variability. The particular string might vary between clinicians/clinics, and perhaps the order too (though I suspect this is less likely). The symptom however is at the very core of the diagnostic questionnaire construct itself. Let's see.
 
 ### The Fun Part
+
+Alright. We have two principles here: 
+
+(1) We're going to use a more generic, questionnaire-agnostic persistence model - `DiagnosticQuestionnaireSubmission` and `DiagnosticQuestionnaireResponse`
+(2) At the API layer we want to keep the interface precise and strict - so we will have specific endpoints for the madrs-s questionnaire, which madrs-s-specific "schemas"
+
+We'll therefore need to create a mapping between our concrete madrs-s model in the API layer and our agnostic persistence model.
+
+So we want:
+
+- A `MadrsSSubmission`, a kind of domain object that we can serialise from the API request
+- A `DiagnosticQuestionnaireSubmission` model in the persistence layer
+- A `MadrsRepo` which will encapsulate the mapping between the first and the second, which we will unit test
+
+### A note on the submission-response relationship
+
+Really we first have a "submission" (a collection of questions specified by the particular diagnostic model, and corresponding self- or clinician-administered answers). Second, we have an individual "response" per question.
+
+Since the nature of these kinds of diagnostic tools require all questions to be answered collectively in a single submission or session (I don't submit 5 answers now and 5 answers later), we should perhaps force the client to respect this in the way it sends the submission/response data.
+
+I think it would be nicer for the client to send in a single API call the complete submission payload containing the answers to all the questions. This makes it easier for the server to validate the integrity of the data (this is a madrs-s submission, so it should contain 10 questions addressing X,Y,Z symptoms). It also means the submission data exists, in the persistence layer, in a binary state: either we have the records for a complete submission, or we have no records at all. There is no possibility of partially complete submissions.
+
+There is a downside to this approach: if an end user completes a partial submission and then there is some network or other error resulting in a loss of client-side state, they would need to restart the submission. This is especially a danger for direct consumers, because we want to treat them with extreme care during a *self-administered* mental-health questionnaire. For clinicians who are submitting results on behalf of patients, this is less of a concern, also we still run the risk of annoying our partners. 
+
+For now though let's follow the requirements of the task and, each time we write a response to an existing submission, we can just check the existing responses to validate the integrity of the incoming response. We will encapsulate this business logic in the `MadrsSSubmission` domain object mentioned above.
