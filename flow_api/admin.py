@@ -1,4 +1,4 @@
 from django.contrib import admin
-from .models import DiagnosticQuestionnaire
+from .models import DiagnosticQuestionnaireSubmission
 
-admin.site.register(DiagnosticQuestionnaire)
+admin.site.register(DiagnosticQuestionnaireSubmission)

@@ -1,10 +1,10 @@
 from django.db import models
 
-class DiagnosticQuestionnaire(models.Model):
+class DiagnosticQuestionnaireSubmission(models.Model):
     MADRS_S = 'Madrs-s'
     MADRS = 'Madrs'
     PHQ_9 = 'Phq-9' 
-    DIAGNOSTIC_QUESTIONNAIRES = (
+    DIAGNOSTIC_QUESTIONNAIRE = (
         (MADRS_S, 'Madrs-s'),
         (MADRS, 'Madrs'),
         (PHQ_9, 'Phq-9'),
@@ -12,6 +12,6 @@ class DiagnosticQuestionnaire(models.Model):
 
     questionnaire_name = models.CharField(
         max_length=7,
-        choices=DIAGNOSTIC_QUESTIONNAIRES,
+        choices=DIAGNOSTIC_QUESTIONNAIRE,
         default=MADRS,
     )
