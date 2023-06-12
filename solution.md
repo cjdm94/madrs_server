@@ -17,3 +17,15 @@ There is an argument to be made that we are working here with fixed, stable syst
 Having more domain knowledge here would help. For now I'll leave it here, as I've found in the past that starting with the data model can be a fool's errand. I'll build the API endpoint handlers first, with stubbed data, as this might shed some light on how we can model the data most sensibly. 
 
 Time to meet Django!
+
+### A Working API
+
+We have a working Django API. Now for the fun bit! 
+
+Some thoughts I had whilst setting up:
+
+(1) The task spec seems to assume we would only have a single diagnostic questionnaire submission per user. Of course typically patients would take the questionnaire periodically, and then clinicians can monitor the fluctuation of scores over time. I think I'll build it to support historical submissions by users - let's see.
+
+(2) We care about individual questions on specific diagnostic questionnaires, so we need to be able to reliably uniquely identify specific questions, not just particular diagnostic questionnaires. The question is, which parameter should we use as a uid? It seems we have a question string, a question order (the index at which the question appears in the questionnaire), and a symptom that the question is designed to "screen". The latter of the three seems to be the most reliable option: the first two are possibly more susceptible to variability. The particular string might vary between clinicians/clinics, and perhaps the order too (though I suspect this is less likely). The symptom however is at the very core of the diagnostic questionnaire construct itself. Let's see.
+
+### The Fun Part
