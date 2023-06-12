@@ -54,3 +54,15 @@ I think it would be nicer for the client to send in a single API call the comple
 There is a downside to this approach: if an end user completes a partial submission and then there is some network or other error resulting in a loss of client-side state, they would need to restart the submission. This is especially a danger for direct consumers, because we want to treat them with extreme care during a *self-administered* mental-health questionnaire. For clinicians who are submitting results on behalf of patients, this is less of a concern, also we still run the risk of annoying our partners. 
 
 For now though let's follow the requirements of the task and, each time we write a response to an existing submission, we can just check the existing responses to validate the integrity of the incoming response. We will encapsulate this business logic in the `MadrsSSubmission` domain object mentioned above.
+
+### Creating Submissions and Submission Responses
+
+So we have an implementation for storing question responses, one by one, and storing them in a kind of "submission" container.
+
+We achieve the initial objective of separating the generic/agnostic `DiagnosticQuestionnaire` persistence model from the concrete `Madrs-s` instantiation. Now we have the business logic isolated in the `madrs-self-domain.py` file - here we enforce the structure and rules of this particular diagnostic questionnaire. I'll unit tests in a follow-up push. 
+
+This allows us to represent the madrs questionnaire in the application/domain layer so that we can add responses to it and enforce the integrity of the data before we persist anything.
+
+There are some imperfections! For instance we treat instantiations of our domain classes as both domain objects (with no id, for example) _and_ entities (representing a persisted version of the data, with an id, for example). Also I have to pass an entire submission object in when I create a new response - I couldn't work out how best to use Django's models to manage relational writes. Anyhow, in the spirit of time I'll leave it here for now, with its warts and all :).
+
+I'm going to figure out how to use an enum to uniquely identify responses by symptom, and then I'll add the filtering and analysis queries. I think I'll just let SQL do the heavy lifting here, and encapsulate the query, via Django's model queries, in the repo. Since we need mostly numerical analysis here, there's not much need for any domain/application logic. Onwards!
