@@ -21,14 +21,23 @@ from flow_api import views
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # for a given patient, get mean for each question across all their submissions
-    path('patient/<int:id>/madrs-s/submissions/mean-scores', views.patient_historical_madrs_s_mean_scores),
-    # get mean for each question across all submissions by all patients
-    path('patients/madrs-s/submissions/mean-scores', views.patients_historical_madrs_s_submissions),
-    # get all patients who responded with a certain score on a certain question (query string)
-    path('patients/madrs-s', views.filter_patients_by_madrs_s_question_score),
-    # all patients, with each of their submissions, each with a total score and depression severity
+    # POST a new submission for a patient
+    path('mdrs-self/submission', views.create_madrs_self_patient_submission),
+
+    # POST a new response for an item belonging to an existing submission
+    path('mdrs-self/submission/response', views.add_madrs_self_patient_submission_response),
+
+    # for a given patient, GET mean for each question across all their submissions
+    path('patient/<int:patient_id>/madrs-self/submissions/mean-scores', views.patient_historical_madrs_self_mean_scores),
+    
+    # GET mean for each question across all submissions by all patients
+    path('patients/madrs-self/submissions/mean-scores', views.patients_historical_madrs_self_submissions),
+    
+    # GET all patients who responded with a certain score on a certain question (query string)
+    path('patients/madrs-self', views.filter_patients_by_madrs_self_question_score),
+    
+    # GET all patients, with each of their submissions, each with a total score and depression severity
     # sorted by total score and with the option to filter on a minimum and/or maximum total score
     # query params (min-total-score, max-total-score)
-    path('patients/madrs-s/submissions', views.patients_historical_madrs_s_submissions)
+    path('patients/madrs-self/submissions', views.patients_historical_madrs_self_submissions)
 ]
