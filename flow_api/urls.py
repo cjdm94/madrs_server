@@ -20,5 +20,15 @@ from flow_api import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('test', views.madrs_s_mean_scores_for_submissions),
+
+    # for a given user, get mean for each question across all their submissions
+    path('patient/<int:id>/madrs-s/submissions/mean-scores', views.patient_historical_madrs_s_mean_scores),
+    # get mean for each question across all submissions by all users
+    path('patients/madrs-s/submissions/mean-scores', views.patients_historical_madrs_s_submissions),
+    # get all users who responded with a certain score on a certain question (query string)
+    path('patients/madrs-s', views.filter_patients_by_madrs_s_question_score),
+    # all users, with each of their submissions, each with a total score and depression severity
+    # sorted by total score and with the option to filter on a minimum and/or maximum total score
+    # query params (min-total-score, max-total-score)
+    path('patients/madrs-s/submissions', views.patients_historical_madrs_s_submissions)
 ]
