@@ -12,7 +12,7 @@ I'm leaning towards a generic diagnostic-questionnaire model in the persistence 
 
 The rules of any particular questionnaire model - e.g. the MADRS-s - can then be encoded in the business logic encapsulated in a MADRS-s class (or equivalent), atop the persistence layer. The rules of each particular questionnaire can be modified or extended easily over time, if needed, but we can still rely on our single `DiagnosticQuestionnaire` persistence model.
 
-There is an argument to be made that we are working here with fixed, stable systems that are not liable to change, and hence we could have a table per instantiation - e.g. `MADRS_S_QUESTIONNAIRE`, `MADRS_QUESTIONNAIRE`, `PHQ-9-QUESTIONNAIRE`. However "we are working here with fixed, stable systems that are not liable to change" may be an example of A classic engineering mistake. So my preliminary conclusion is: in the persistence model, defend against unexpected changes and complexity, even though we're modelling a relatively fixed system. Then encode the specific rules of each questionnaire type in the domain layer, and extend this easily over time, if these changes and new complexities do manifest. This gives us extendability, separation of business logic from the persistence layer so our rules can be unit tested well, and ease of querying, with fewer models to manage and maintain.
+There is an argument to be made that we are working here with fixed, stable systems that are not liable to change, and hence we could have a table per instantiation - e.g. `MADRS_S_QUESTIONNAIRE`, `MADRS_QUESTIONNAIRE`, `PHQ-9-QUESTIONNAIRE`. However "we are working here with fixed, stable systems that are not liable to change" may be an example of a classic engineering mistake. So my preliminary conclusion is: in the persistence model, defend against unexpected changes and complexity, even though we're modelling a relatively fixed system. Then encode the specific rules of each questionnaire type in the domain layer, and extend this easily over time, if these changes and new complexities do manifest. This gives us extendability, separation of business logic from the persistence layer so our rules can be unit tested well, and ease of querying, with fewer models to manage and maintain.
 
 Having more domain knowledge here would help. For now I'll leave it here, as I've found in the past that starting with the data model can be a fool's errand. I'll build the API endpoint handlers first, with stubbed data, as this might shed some light on how we can model the data most sensibly. 
 
@@ -49,9 +49,9 @@ Really we first have a "submission" (a collection of questions specified by the 
 
 Since the nature of these kinds of diagnostic tools require all questions to be answered collectively in a single submission or session (I don't submit 5 answers now and 5 answers later), we should perhaps force the client to respect this in the way it sends the submission/response data.
 
-I think it would be nicer for the client to send in a single API call the complete submission payload containing the answers to all the questions. This makes it easier for the server to validate the integrity of the data (this is a madrs-s submission, so it should contain 10 questions addressing X,Y,Z symptoms). It also means the submission data exists, in the persistence layer, in a binary state: either we have the records for a complete submission, or we have no records at all. There is no possibility of partially complete submissions.
+I think it would be nicer for the client to send in a single API call the complete submission payload containing the answers to all the questions. This makes it easier for the server to validate the integrity of the data (this is a madrs-s submission, so it should contain 9 questions addressing X,Y,Z symptoms). It also means the submission data exists, in the persistence layer, in a binary state: either we have the records for a complete submission, or we have no records at all. There is no possibility of partially complete submissions.
 
-There is a downside to this approach: if an end user completes a partial submission and then there is some network or other error resulting in a loss of client-side state, they would need to restart the submission. This is especially a danger for direct consumers, because we want to treat them with extreme care during a *self-administered* mental-health questionnaire. For clinicians who are submitting results on behalf of patients, this is less of a concern, also we still run the risk of annoying our partners. 
+There is a downside to this approach: if an end user completes a partial submission and then there is some network or other error resulting in a loss of client-side state, they would need to restart the submission. This is especially a danger for direct consumers, because we want to treat them with extreme care during a *self-administered* mental-health questionnaire. For clinicians who are submitting results on behalf of patients, this is less of a concern, although we still run the risk of annoying our partners. 
 
 For now though let's follow the requirements of the task and, each time we write a response to an existing submission, we can just check the existing responses to validate the integrity of the incoming response. We will encapsulate this business logic in the `MadrsSSubmission` domain object mentioned above.
 
@@ -89,9 +89,9 @@ This was interesting. My SQL knowledge is limited and this is my first time usin
 
 - This is where we encode the biz rules of particular questionnaire instantiations. We have a MadrsSubmission class which encodes the structure and rules of the questionnaire and enforces these characteristics on the data flowing through our application. Isolating the business logic here allows us to unit test it, and will help to ensure the data we write to the db is correct
 
-### Further considerations
+### Further considerations
 
-- A bloody linter! (Forgive me, I'm just a bit pished for time. My eyes hurt, too)
+- A bloody linter! (Forgive me, I'm just a bit pushed for time. My eyes hurt, too)
 - Integration tests on our repo methods. Especially important given we have a lot of query logic in the data layer
 - Integration tests for the handler functions, with our repo (and possibly our domain objects) mocked
 - Authentication + authorisation. Eventually I imagine we'd need some kind of roles-based auth, especially for the clinician platform, where we may need to support multiple accounts per clinic
