@@ -5,6 +5,7 @@ from .madrs_self_domain import MadrsSelfSubmission, MadrsSelfSubmissionResponse
 from .madrs_self_repo import MadrsSelfSubmissionRepo, MadrsSelfResponseRepo
 from .madrs_self_api import CreateMadrsSelfPatientSubmissionSerializer, AddMadrsSelfPatientSubmissionSerializer, FilterPatientsByMadrsSelfSymptomScoreSerializer, GetPatientHistoricalMadrsSelfMeanSymptomScoresSerializer
 
+# create a submission - a container for a patient's responses to an instance of the MARRS-S questionnaire
 @api_view(['POST'])
 def create_madrs_self_patient_submission(request):
     serializer = CreateMadrsSelfPatientSubmissionSerializer(
@@ -20,6 +21,7 @@ def create_madrs_self_patient_submission(request):
     except Exception as e:
         return JsonResponse(data={ 'error': e.args }, status=500)
 
+# assign to an existing submission a patient's response to a particular item of the MARRS-S questionnaire
 @api_view(['POST'])
 def add_madrs_self_patient_submission_response(request):
     serializer = AddMadrsSelfPatientSubmissionSerializer(
@@ -34,9 +36,10 @@ def add_madrs_self_patient_submission_response(request):
     submission_id = serializer.data.get('submission_id')
     
     try:
+        # in the domain/application layer we represent the submission from the database, with its related responses
         submission_repo = MadrsSelfSubmissionRepo()
         submission = submission_repo.get(submission_id)
-
+        
         response = MadrsSelfSubmissionResponse(
             id=None,
             item_index=len(submission.responses),
@@ -46,6 +49,8 @@ def add_madrs_self_patient_submission_response(request):
             item_string=serializer.data.get('item_string'),
             score=serializer.data.get('score') 
         )
+        # and our submission "domain object" enforces the MADRS-S structure and rules
+        # to ensure the incoming response is valid in its own right, and with respect to the submission's existing responses
         submission.add_response(response)
         created = MadrsSelfResponseRepo().create(response, submission)
 
@@ -86,7 +91,21 @@ def patients_historical_madrs_self_mean_scores(request):
 # sorted by total score and with the option to filter on a minimum and/or maximum total score
 @api_view(['GET'])
 def patients_historical_madrs_self_submissions(request):
-    return JsonResponse(data={ "count": 0 })
+    try:
+        submission_repo = MadrsSelfSubmissionRepo()
+        submissions_by_patient = submission_repo.get_all_grouped_by_patient()
+        patient_submission_summaries = [
+            {
+                'submissionId': s.id, 
+                'patientId': s.patient_id,
+                'totalScore': s.total_score(), 
+                'severity': s.depression_severity().value
+            } for s in submissions_by_patient
+        ]
+
+        return JsonResponse(data={ 'data': patient_submission_summaries })
+    except Exception as e:
+        return JsonResponse(data={ 'error': e.args }, status=500)
 
 # all patients who responded with a certain score on a certain question
 @api_view(['GET'])

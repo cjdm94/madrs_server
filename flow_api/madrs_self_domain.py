@@ -71,12 +71,12 @@ class MadrsSelfSubmission:
             raise Exception("Invalid Madrs-s item score: %d" % response.score)
         
         response = MadrsSelfSubmissionResponse(
-            id=response.id, 
+            id=response.id,
             item_index=len(self.responses),
-            submission_id=self.id, 
+            submission_id=self.id,
             patient_id=self.patient_id,
-            symptom=response.symptom, 
-            item_string=response.item_string, 
+            symptom=response.symptom,
+            item_string=response.item_string,
             score=response.score
         )
         self.responses.append(response)
