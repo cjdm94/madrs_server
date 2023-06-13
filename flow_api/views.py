@@ -1,6 +1,5 @@
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
-import datetime
 from .madrs_self_domain import MadrsSelfSubmission, MadrsSelfSubmissionResponse
 from .madrs_self_repo import MadrsSelfSubmissionRepo, MadrsSelfResponseRepo
 from .madrs_self_api import CreateMadrsSelfPatientSubmissionSerializer, AddMadrsSelfPatientSubmissionSerializer, FilterPatientsByMadrsSelfSymptomScoreSerializer, GetPatientHistoricalMadrsSelfMeanSymptomScoresSerializer
@@ -17,9 +16,9 @@ def create_madrs_self_patient_submission(request):
     try:
         submission = MadrsSelfSubmission(id=None, patient_id=patient_id, responses=None)
         submissionId = MadrsSelfSubmissionRepo().create(submission)
-        return JsonResponse(data={ "submissionId": submissionId }, safe=False)
+        return JsonResponse( data={ "submissionId": submissionId }, safe=False )
     except Exception as e:
-        return JsonResponse(data={ 'error': e.args }, status=500)
+        return JsonResponse( data={ 'error': e.args }, status=500 )
 
 # assign to an existing submission a patient's response to a particular item of the MARRS-S questionnaire
 @api_view(['POST'])
@@ -54,9 +53,9 @@ def add_madrs_self_patient_submission_response(request):
         submission.add_response(response)
         created = MadrsSelfResponseRepo().create(response, submission)
 
-        return JsonResponse(data={ 'responseId': created.id }, safe=False)
+        return JsonResponse( data={ 'responseId': created.id }, safe=False )
     except Exception as e:
-        return JsonResponse(data={ 'error': e.args }, status=500)
+        return JsonResponse( data={ 'error': e.args }, status=500 )
 
 # for a given patient, get mean for each question across all their submissions
 @api_view(['GET'])
@@ -75,7 +74,7 @@ def patient_historical_madrs_self_mean_scores(request, patient_id):
             'historical_mean_scores': mean_score_by_symptom 
         } })
     except Exception as e:
-        return JsonResponse(data={ 'error': e.args }, status=500)
+        return JsonResponse( data={ 'error': e.args }, status=500 )
 
 # get mean for each question across all submissions by all patients
 @api_view(['GET'])
@@ -85,9 +84,9 @@ def patients_historical_madrs_self_mean_scores(request):
         mean_score_by_symptom = response_repo.get_historical_mean_all_symptoms_all_patients()
         return JsonResponse(data={ 'data': mean_score_by_symptom })
     except Exception as e:
-        return JsonResponse(data={ 'error': e.args }, status=500)
+        return JsonResponse( data={ 'error': e.args }, status=500 )
 
-# all patients, with each of their submissions, each with a total score and depression severity
+# all patients (with each of their submissions) each with a total score and depression severity
 # sorted by total score and with the option to filter on a minimum and/or maximum total score
 @api_view(['GET'])
 def patients_historical_madrs_self_submissions(request):
@@ -102,8 +101,8 @@ def patients_historical_madrs_self_submissions(request):
                 'severity': s.depression_severity().value
             } for s in submissions_by_patient
         ]
-
-        return JsonResponse(data={ 'data': patient_submission_summaries })
+        sorted_by_total_score = sorted(patient_submission_summaries, key=lambda d: d['totalScore']) 
+        return JsonResponse(data={ 'data': sorted_by_total_score })
     except Exception as e:
         return JsonResponse(data={ 'error': e.args }, status=500)
 
