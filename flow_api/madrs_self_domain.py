@@ -1,5 +1,4 @@
-from django.db import models
-from .common import DiagnosticQuestionnaireType
+from common import DiagnosticQuestionnaireType
 import uuid
 from enum import Enum
 
@@ -26,7 +25,13 @@ class MadrsSelfSymptoms(Enum):
     @classmethod
     def valid(cls, symptom):
         return symptom in cls.list()
+    
 
+class MadrsSelfSeverityCategories(Enum):
+    NO_DEPRESSION = 'NO_DEPRESSION'
+    MILD_DEPRESSION = 'MILD_DEPRESSION'
+    MODERATE_DEPRESSION = 'MODERATE_DEPRESSION'
+    SEVERE_DEPRESSION = 'SEVERE_DEPRESSION'
 
 class MadrsSelfSubmissionResponse:
     def __init__(self, id, item_index, submission_id, patient_id, symptom, item_string, score):
@@ -53,7 +58,7 @@ class MadrsSelfSubmission:
         self.patient_id = patient_id
     
     def add_response(self, response):
-        if self.responses is self.total_items:
+        if len(self.responses) is self.total_items:
             raise Exception("Madrs-s submission must have no more than %d responses" % self.total_items)
         
         if not MadrsSelfSymptoms.valid(response.symptom):
@@ -76,3 +81,19 @@ class MadrsSelfSubmission:
         )
         self.responses.append(response)
     
+    def total_score(self):
+        return sum(r.score for r in self.responses)
+
+    def depression_severity(self): 
+        total_score = self.total_score()
+        if total_score < self.min_total_score or total_score > self.max_total_score:
+            raise Exception("Invalid Madrs-s total score: %d" % total_score)
+        
+        if 0 <= total_score <= 12:
+            return MadrsSelfSeverityCategories.NO_DEPRESSION
+        if 13 <= total_score <= 19:
+            return MadrsSelfSeverityCategories.MILD_DEPRESSION
+        if 20 <= total_score <= 34:
+            return MadrsSelfSeverityCategories.MODERATE_DEPRESSION
+        if total_score > 34:
+            return MadrsSelfSeverityCategories.MODERATE_DEPRESSION

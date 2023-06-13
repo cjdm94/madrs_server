@@ -1,6 +1,8 @@
 from django.db import models
 
 class DiagnosticQuestionnaireType(models.TextChoices):
-    MADRS = 'Madrs'
-    MADRS_SELF = 'Madrs-s'
-    PHQ_9 = 'Phq-9'
+    MADRS = 'MADRS'
+    MADRS_SELF = 'MADRS-S'
+    PHQ_9 = 'PHQ_9'
+    HDI = 'HDI'
+    BDI = 'BDI'
