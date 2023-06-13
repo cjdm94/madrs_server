@@ -96,4 +96,4 @@ class MadrsSelfSubmission:
         if 20 <= total_score <= 34:
             return MadrsSelfSeverityCategories.MODERATE_DEPRESSION
         if total_score > 34:
-            return MadrsSelfSeverityCategories.MODERATE_DEPRESSION
+            return MadrsSelfSeverityCategories.SEVERE_DEPRESSION
