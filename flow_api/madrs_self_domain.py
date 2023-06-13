@@ -26,6 +26,12 @@ class MadrsSelfSymptoms(Enum):
     def valid(cls, symptom):
         return symptom in cls.list()
     
+MADRS_SELF_TOTAL_ITEMS = len(MadrsSelfSymptoms.list())
+MADRS_SELF_SCORE_INCREMENTS = 1
+MADRS_SELF_MIN_ITEM_SCORE = 0
+MADRS_SELF_MAX_ITEM_SCORE = 6
+MADRS_SELF_MIN_TOTAL_SCORE = 0
+MADRS_SELF_MAX_TOTAL_SCORE = MADRS_SELF_MAX_ITEM_SCORE * MADRS_SELF_TOTAL_ITEMS
 
 class MadrsSelfSeverityCategories(Enum):
     NO_DEPRESSION = 'NO_DEPRESSION'
@@ -45,12 +51,12 @@ class MadrsSelfSubmissionResponse:
 
 class MadrsSelfSubmission:
     questionnaire_type = DiagnosticQuestionnaireType.MADRS_SELF
-    total_items = len(MadrsSelfSymptoms.list())
-    min_item_score = 0
-    max_item_score = 6
-    score_increments = 1
-    min_total_score = 0
-    max_total_score = max_item_score * total_items
+    total_items = MADRS_SELF_TOTAL_ITEMS
+    min_item_score = MADRS_SELF_MIN_ITEM_SCORE
+    max_item_score = MADRS_SELF_MAX_ITEM_SCORE
+    score_increments = MADRS_SELF_SCORE_INCREMENTS
+    min_total_score = MADRS_SELF_MIN_TOTAL_SCORE
+    max_total_score = MADRS_SELF_MAX_TOTAL_SCORE
     
     def __init__(self, id, patient_id, responses):
         self.id = id or uuid.uuid4()

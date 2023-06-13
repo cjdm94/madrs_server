@@ -100,6 +100,7 @@ This was interesting. My SQL knowledge is limited and this is my first time usin
 - PII - we are of course handling sensitive personal information relating to mental health. PII should therefore be at the forefront of our minds when designing any system (though I am certainly no expert in this area)
 - GraphQL vs. REST. GraphQL gives you strong typing on both sides which helps with data integrity. I do like the simplicity of REST though
 - Lena mentioned you currently have two clients, one for clinicians and one for "direct consumers". We might eventually build an distinct API per client, to separate concerns, and break out shared models and libraries to be consumed by both
+- I realised when I started writing the summary endpoint (with scores and severity) that I should store the total_score in the Submission table. Storage is cheaper than computation and it means we can filter on this field via SQL! Doh!
 
 ### Final Words
 

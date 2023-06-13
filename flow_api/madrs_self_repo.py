@@ -48,7 +48,7 @@ class MadrsSelfSubmissionRepo:
 
     # querying is inefficient here; should set up the relational model so that I can fetched submissions with their responses 
     def get_all_grouped_by_patient(self):
-        submissions = self.model.objects.all().distinct().order_by('patient_id', 'id')
+        submissions = self.model.objects.all().distinct().order_by('patient_id')
         return [ madrs_self_submission(s, self.get_submission_responses(s.id)) for s in submissions ]
         
 class MadrsSelfResponseRepo:

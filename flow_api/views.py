@@ -1,8 +1,8 @@
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
-from .madrs_self_domain import MadrsSelfSubmission, MadrsSelfSubmissionResponse
+from .madrs_self_domain import MadrsSelfSubmission, MadrsSelfSubmissionResponse, MADRS_SELF_MIN_TOTAL_SCORE, MADRS_SELF_MAX_TOTAL_SCORE
 from .madrs_self_repo import MadrsSelfSubmissionRepo, MadrsSelfResponseRepo
-from .madrs_self_api import CreateMadrsSelfPatientSubmissionSerializer, AddMadrsSelfPatientSubmissionSerializer, FilterPatientsByMadrsSelfSymptomScoreSerializer, GetPatientHistoricalMadrsSelfMeanSymptomScoresSerializer
+from .madrs_self_api import CreateMadrsSelfPatientSubmissionSerializer, AddMadrsSelfPatientSubmissionSerializer, FilterPatientsByMadrsSelfSymptomScoreSerializer, GetPatientHistoricalMadrsSelfMeanSymptomScoresSerializer, GetPatientsHistoricalMadrsSelfSubmissionsSerializer
 
 # create a submission - a container for a patient's responses to an instance of the MARRS-S questionnaire
 @api_view(['POST'])
@@ -90,7 +90,18 @@ def patients_historical_madrs_self_mean_scores(request):
 # sorted by total score and with the option to filter on a minimum and/or maximum total score
 @api_view(['GET'])
 def patients_historical_madrs_self_submissions(request):
+    serializer = GetPatientsHistoricalMadrsSelfSubmissionsSerializer(
+        data={
+            'min_total_score': request.query_params.get('minTotalScore') or MADRS_SELF_MIN_TOTAL_SCORE,
+            'max_total_score': request.query_params.get('maxTotalScore') or MADRS_SELF_MAX_TOTAL_SCORE,
+        }
+    )
+    serializer.is_valid(raise_exception=True)
+
     try:
+        min_total_score = serializer.data.get('min_total_score')
+        max_total_score = serializer.data.get('max_total_score')
+    
         submission_repo = MadrsSelfSubmissionRepo()
         submissions_by_patient = submission_repo.get_all_grouped_by_patient()
         patient_submission_summaries = [
@@ -101,10 +112,15 @@ def patients_historical_madrs_self_submissions(request):
                 'severity': s.depression_severity().value
             } for s in submissions_by_patient
         ]
-        sorted_by_total_score = sorted(patient_submission_summaries, key=lambda d: d['totalScore']) 
+        
+        # AHA! I should be storing the total score in the Submission table. Storage cheaper than computation!! Doh.
+        # Then we could do both these in the data layer - more efficient than computing score, filtering and sorting, every time
+        filtered_by_total_score = [s for s in patient_submission_summaries if min_total_score <= s['totalScore'] <= max_total_score]
+        sorted_by_total_score = sorted(filtered_by_total_score, key=lambda d: d['totalScore'])
+
         return JsonResponse(data={ 'data': sorted_by_total_score })
     except Exception as e:
-        return JsonResponse(data={ 'error': e.args }, status=500)
+        return JsonResponse( data={ 'error': e.args }, status=500 )
 
 # all patients who responded with a certain score on a certain question
 @api_view(['GET'])

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .madrs_self_domain import MadrsSelfSymptoms
+from .madrs_self_domain import MadrsSelfSymptoms, MADRS_SELF_MIN_TOTAL_SCORE, MADRS_SELF_MAX_TOTAL_SCORE
 
 class CreateMadrsSelfPatientSubmissionSerializer(serializers.Serializer):
    patient_id = serializers.IntegerField()
@@ -16,3 +16,17 @@ class FilterPatientsByMadrsSelfSymptomScoreSerializer(serializers.Serializer):
 
 class GetPatientHistoricalMadrsSelfMeanSymptomScoresSerializer(serializers.Serializer):
    patient_id = serializers.IntegerField()
+
+class GetPatientsHistoricalMadrsSelfSubmissionsSerializer(serializers.Serializer):
+   min_total_score = serializers.IntegerField(
+      required=False, 
+      min_value=MADRS_SELF_MIN_TOTAL_SCORE, 
+      max_value=MADRS_SELF_MAX_TOTAL_SCORE, 
+      default=MADRS_SELF_MIN_TOTAL_SCORE
+   )
+   max_total_score = serializers.IntegerField(
+      required=False, 
+      min_value=MADRS_SELF_MIN_TOTAL_SCORE, 
+      max_value=MADRS_SELF_MAX_TOTAL_SCORE, 
+      default=MADRS_SELF_MAX_TOTAL_SCORE
+   )
