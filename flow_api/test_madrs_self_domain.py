@@ -108,6 +108,84 @@ class TestMadrsSelfSubmission(unittest.TestCase):
         
         self.assertEqual(submission.total_score(), 22)
         self.assertEqual(submission.depression_severity(), MadrsSelfSeverityCategories.MODERATE_DEPRESSION)
+    
+    def test_add_response_err_max_responses(self):
+        submission = MadrsSelfSubmission(
+            id=submission_id, 
+            patient_id=patient_id,
+            responses=None
+        )
+        
+        for response in stubbed_responses.values():
+          submission.add_response(response)
+
+        with self.assertRaises(Exception):
+           submission.add_response(stubbed_responses.get(MadrsSelfSymptoms.ZEST_FOR_LIFE))
+
+    def test_add_response_err_invalid_symptom(self):
+        submission = MadrsSelfSubmission(
+            id=submission_id, 
+            patient_id=patient_id,
+            responses=None
+        )
+        
+        with self.assertRaises(Exception):
+            submission.add_response(MadrsSelfSubmissionResponse(
+                id='suicidal-ideation-response', 
+                item_index=9, 
+                submission_id=submission_id, 
+                patient_id=patient_id,
+                symptom='SUICIDAL_IDEATION',
+                item_string='Representing the feeling that life is not worth living.',
+                score=0
+            ))
+    
+    def test_add_response_err_duplicate_symptom(self):
+        submission = MadrsSelfSubmission(
+            id=submission_id, 
+            patient_id=patient_id,
+            responses=None
+        )
+
+        submission.add_response(stubbed_responses.get(MadrsSelfSymptoms.MOOD))      
+        with self.assertRaises(Exception):
+            submission.add_response(stubbed_responses.get(MadrsSelfSymptoms.MOOD))
+    
+    def test_add_response_err_score_too_low(self):
+        submission = MadrsSelfSubmission(
+            id=submission_id, 
+            patient_id=patient_id,
+            responses=None
+        )
+
+        with self.assertRaises(Exception):
+            submission.add_response(MadrsSelfSubmissionResponse(
+                id='mood-response', 
+                item_index=0, 
+                submission_id=submission_id, 
+                patient_id=patient_id,
+                symptom=MadrsSelfSymptoms.MOOD.value,
+                item_string='Here you should try to indicate your mood.',
+                score=-1
+            ))
+    
+    def test_add_response_err_score_too_high(self):
+        submission = MadrsSelfSubmission(
+            id=submission_id, 
+            patient_id=patient_id,
+            responses=None
+        )
+
+        with self.assertRaises(Exception):
+            submission.add_response(MadrsSelfSubmissionResponse(
+                id='mood-response', 
+                item_index=0, 
+                submission_id=submission_id, 
+                patient_id=patient_id,
+                symptom=MadrsSelfSymptoms.MOOD.value,
+                item_string='Here you should try to indicate your mood.',
+                score=10
+            ))
 
 if __name__ == "__main__":
     unittest.main()
