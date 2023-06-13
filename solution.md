@@ -114,6 +114,8 @@ Thank you guys - I enjoyed this and I really learned a lot, it was truly a Djang
 
 ### Setup Instructions
 
-...
+- Create new migrations following changes to models: `python manage.py makemigrations`
+- Apply migrations: `python manage.py migrate`
+- Tests (from the root): `python manage.py test flow_api`
 
-- To run tests (from the root): `python manage.py test flow_api`
+(update: oh my god, I have only just got the VSCode Python autolinting working. i have been living in the dark. i hate myself lol)

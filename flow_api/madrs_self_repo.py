@@ -1,6 +1,6 @@
+from django.db.models import Avg
 from flow_api.madrs_self_domain import MadrsSelfSubmission, MadrsSelfSubmissionResponse, MadrsSelfSymptoms
 from flow_api.models import DiagnosticQuestionnaireSubmission, DiagnosticQuestionnaireSubmissionResponse
-from django.db.models import Avg, Aggregate
 
 
 def madrs_self_submission_response(diagnostic_questionnaire_response):
