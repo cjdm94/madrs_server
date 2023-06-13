@@ -26,10 +26,12 @@ def create_madrs_self_patient_submission(request):
     serializer.is_valid(raise_exception=True)
     patient_id = serializer.data.get('patient_id')
 
-    submission = MadrsSelfSubmission(id=None, patient_id=patient_id, responses=None)
-    submissionId = MadrsSelfSubmissionRepo().create(submission)
-
-    return JsonResponse(data={ "submissionId": submissionId }, safe=False)
+    try:
+        submission = MadrsSelfSubmission(id=None, patient_id=patient_id, responses=None)
+        submissionId = MadrsSelfSubmissionRepo().create(submission)
+        return JsonResponse(data={ "submissionId": submissionId }, safe=False)
+    except Exception as e:
+        return JsonResponse(data={ 'error': e.args }, status=500)
 
 @api_view(['POST'])
 def add_madrs_self_patient_submission_response(request):
@@ -44,22 +46,25 @@ def add_madrs_self_patient_submission_response(request):
     serializer.is_valid(raise_exception=True)
     submission_id = serializer.data.get('submission_id')
     
-    submission_repo = MadrsSelfSubmissionRepo()
-    submission = submission_repo.get(submission_id)
+    try:
+        submission_repo = MadrsSelfSubmissionRepo()
+        submission = submission_repo.get(submission_id)
 
-    response = MadrsSelfSubmissionResponse(
-        id=None,
-        item_index=len(submission.responses),
-        submission_id=submission_id,
-        patient_id=submission.patient_id,
-        symptom=serializer.data.get('symptom'), 
-        item_string=serializer.data.get('item_string'),
-        score=serializer.data.get('score') 
-    )
-    submission.add_response(response)
-    created = MadrsSelfResponseRepo().create(response, submission)
+        response = MadrsSelfSubmissionResponse(
+            id=None,
+            item_index=len(submission.responses),
+            submission_id=submission_id,
+            patient_id=submission.patient_id,
+            symptom=serializer.data.get('symptom'), 
+            item_string=serializer.data.get('item_string'),
+            score=serializer.data.get('score') 
+        )
+        submission.add_response(response)
+        created = MadrsSelfResponseRepo().create(response, submission)
 
-    return JsonResponse(data={ 'responseId': created.id }, safe=False)
+        return JsonResponse(data={ 'responseId': created.id }, safe=False)
+    except Exception as e:
+        return JsonResponse(data={ 'error': e.args }, status=500)
 
 # for a given patient, get mean for each question across all their submissions
 @api_view(['GET'])
