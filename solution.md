@@ -101,3 +101,10 @@ This was interesting. My SQL knowledge is limited and this is my first time usin
 - GraphQL vs. REST. GraphQL gives you strong typing on both sides which helps with data integrity. I do like the simplicity of REST though
 - Lena mentioned you currently have two clients, one for clinicians and one for "direct consumers". We might eventually build an distinct API per client, to separate concerns, and break out shared models and libraries to be consumed by both
 
+### Final Words
+
+I hope all the ramblings here weren't too annoying - I find it helps me to think, and I wanted to share the inner dialogue with you as much as possible!
+
+Thank you guys - I enjoyed this and I really learned a lot, it was truly a Django crash course! Speak soon.
+
+![Rusty me, navigating Django, Python, SQL, REST all at the same time:](https://i.kym-cdn.com/photos/images/newsfeed/000/234/765/b7e.jpg)
