@@ -18,7 +18,7 @@ Having more domain knowledge here would help. For now I'll leave it here, as I'v
 
 Time to meet Django!
 
-### A Working API
+## A Working API
 
 We have a working Django API. Now for the fun bit! 
 
@@ -28,7 +28,7 @@ Some thoughts I had whilst setting up:
 
 (2) We care about individual questions on specific diagnostic questionnaires, so we need to be able to reliably uniquely identify specific questions, not just particular diagnostic questionnaires. The question is, which parameter should we use as a uid? It seems we have a question string, a question order (the index at which the question appears in the questionnaire), and a symptom that the question is designed to "screen". The latter of the three seems to be the most reliable option: the first two are possibly more susceptible to variability. The particular string might vary between clinicians/clinics, and perhaps the order too (though I suspect this is less likely). The symptom however is at the very core of the diagnostic questionnaire construct itself. Let's see.
 
-### The Fun Part
+## The Fun Part
 
 Alright. We have two principles here: 
 
@@ -43,7 +43,7 @@ So we want:
 - A `DiagnosticQuestionnaireSubmission` model in the persistence layer
 - A `MadrsRepo` which will encapsulate the mapping between the first and the second, which we will unit test
 
-### A note on the submission-response relationship
+## A note on the submission-response relationship
 
 Really we first have a "submission" (a collection of questions specified by the particular diagnostic model, and corresponding self- or clinician-administered answers). Second, we have an individual "response" per question.
 
@@ -55,7 +55,7 @@ There is a downside to this approach: if an end user completes a partial submiss
 
 For now though let's follow the requirements of the task and, each time we write a response to an existing submission, we can just check the existing responses to validate the integrity of the incoming response. We will encapsulate this business logic in the `MadrsSSubmission` domain object mentioned above.
 
-### Creating Submissions and Submission Responses
+## Creating Submissions and Submission Responses
 
 So we have an implementation for storing question responses, one by one, and storing them in a kind of "submission" container.
 
@@ -66,3 +66,38 @@ This allows us to represent the madrs questionnaire in the application/domain la
 There are some imperfections! For instance we treat instantiations of our domain classes as both domain objects (with no id, for example) _and_ entities (representing a persisted version of the data, with an id, for example). Also I have to pass an entire submission object in when I create a new response - I couldn't work out how best to use Django's models to manage relational writes. Anyhow, in the spirit of time I'll leave it here for now, with its warts and all :).
 
 I'm going to figure out how to use an enum to uniquely identify responses by symptom, and then I'll add the filtering and analysis queries. I think I'll just let SQL do the heavy lifting here, and encapsulate the query, via Django's model queries, in the repo. Since we need mostly numerical analysis here, there's not much need for any domain/application logic. Onwards!
+
+## Querying!
+
+This was interesting. My SQL knowledge is limited and this is my first time using Django, so my repo queries are probably a little hacky! Given more time, I would write integration tests against the db for these queries to validate the query logic. It can also be nice to have computation in the application layer, so you can unit test it, but I think in this case it makes sense to let SQL do the heavy lifting and protect with int tests, especially since the Response table would very quickly contain many records.
+
+## Solution Summary
+
+### API layer
+
+- I wanted to keep the interfaces slim and strict, with SRP in mind. Better to be explicit even if it means having many more handlers. Hence we have MADRS-S specific handlers, and were we to extend to other diagnostic tools, we would similarly add specific handlers for them.
+- Made use of Django serialization to handle validation. Quite nice and simple to implement. Didn't go too far with restrictions - mostly just specified types.
+- In a bigger application I would probably pull out the logic in the handler functions and import them into the views file. Leaving them here for simplicity's sake.
+
+### Persistence layer
+
+- As discussed, I have a submission-response model that is also agnostic with respect to particular instantiations of diagnostic questionnaires. This keeps the persistence model flexible if we want to support other questionnaires 
+- I tried to encapsulate the models in a repo, so the models are never exposed to the API layer (I don't serialize between API request input and models). Not strictly necessary for a project of this size, but I wanted to inject between the two a domain layer to house the biz logic and protect the integrity of the submission-response data we write to the database
+- I really hacked my way through the Django models ORM (first time), so I expect the code here is far from conventional. Learning!
+  
+### Domain layer
+
+- This is where we encode the biz rules of particular questionnaire instantiations. We have a MadrsSubmission class which encodes the structure and rules of the questionnaire and enforces these characteristics on the data flowing through our application. Isolating the business logic here allows us to unit test it, and will help to ensure the data we write to the db is correct
+
+### Further considerations
+
+- A bloody linter! (Forgive me, I'm just a bit pished for time. My eyes hurt, too)
+- Integration tests on our repo methods. Especially important given we have a lot of query logic in the data layer
+- Integration tests for the handler functions, with our repo (and possibly our domain objects) mocked
+- Authentication + authorisation. Eventually I imagine we'd need some kind of roles-based auth, especially for the clinician platform, where we may need to support multiple accounts per clinic
+- Pagination might be necessary as volumes grow, although for now we mostly fetch aggregated metrics 
+- Concurrency. Load balancing might be necessary at higher volumes 
+- PII - we are of course handling sensitive personal information relating to mental health. PII should therefore be at the forefront of our minds when designing any system (though I am certainly no expert in this area)
+- GraphQL vs. REST. GraphQL gives you strong typing on both sides which helps with data integrity. I do like the simplicity of REST though
+- Lena mentioned you currently have two clients, one for clinicians and one for "direct consumers". We might eventually build an distinct API per client, to separate concerns, and break out shared models and libraries to be consumed by both
+
