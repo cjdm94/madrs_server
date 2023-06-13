@@ -1,4 +1,4 @@
-import unittest
+from django.test import TestCase
 from flow_api.madrs_self_domain import MadrsSelfSubmission, MadrsSelfSubmissionResponse, MadrsSelfSymptoms, MadrsSelfSeverityCategories
 
 submission_id = 'submission-1'
@@ -89,7 +89,7 @@ stubbed_responses = {
 }
 
 
-class TestMadrsSelfSubmission(unittest.TestCase):
+class TestMadrsSelfSubmission(TestCase):
     def test_add_response(self):
         submission = MadrsSelfSubmission(
             id=submission_id,
@@ -189,7 +189,3 @@ class TestMadrsSelfSubmission(unittest.TestCase):
                 item_string='Here you should try to indicate your mood.',
                 score=10
             ))
-
-
-if __name__ == "__main__":
-    unittest.main()

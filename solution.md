@@ -108,4 +108,12 @@ I hope all the ramblings here weren't too annoying - I find it helps me to think
 
 Thank you guys - I enjoyed this and I really learned a lot, it was truly a Django crash course! Speak soon.
 
-![Rusty me, navigating Django, Python, SQL, REST all at the same time:](https://i.kym-cdn.com/photos/images/newsfeed/000/234/765/b7e.jpg)
+*Rusty me, navigating Django, Python, SQL, REST all at the same time:
+
+![coder-doggo:](https://i.kym-cdn.com/photos/images/newsfeed/000/234/765/b7e.jpg)
+
+### Setup Instructions
+
+...
+
+- To run tests (from the root): `python manage.py test flow_api`

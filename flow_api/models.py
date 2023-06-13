@@ -8,16 +8,14 @@ class DiagnosticQuestionnaireSubmission(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     questionnaire_type = models.TextField()
-    # change to email field for demonstration purposes
-    patient_id = models.IntegerField()
+    patient_id = models.EmailField()
 
 
 class DiagnosticQuestionnaireSubmissionResponse(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # change to email field for demonstration purposes
-    patient_id = models.IntegerField()
+    patient_id = models.EmailField()
     questionnaire_type = models.TextField()
     submission = models.ForeignKey(
         DiagnosticQuestionnaireSubmission, on_delete=models.CASCADE)

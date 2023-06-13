@@ -100,7 +100,7 @@ class TestSeeder:
 
 
 class TestMadrsSelfRepo(TestCase):
-    def setup(self):
+    def setUp(self):
         seeder = TestSeeder()
         seeder.create_complete_submission(
             patient_id='callum@gaia.family',
@@ -132,3 +132,10 @@ class TestMadrsSelfRepo(TestCase):
             submission_id=4,
             scores=[0, 0, 3, 4, 4, 1, 5, 1, 0]
         )
+
+    def test_create_submission(self):
+        submission_repo = MadrsSelfSubmissionRepo()
+        response_repo = MadrsSelfResponseRepo()
+
+        submissions = submission_repo.get_all_grouped_by_patient()
+        print(submissions)
