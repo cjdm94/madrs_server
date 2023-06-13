@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from .madrs_self_domain import MadrsSelfSymptoms
 
 
 # todo: validate against symptom and questionnaire_type enums
@@ -18,7 +19,7 @@ class DiagnosticQuestionnaireSubmissionResponse(models.Model):
     patient_id = models.IntegerField()
     questionnaire_type = models.TextField()
     submission = models.ForeignKey(DiagnosticQuestionnaireSubmission, on_delete=models.CASCADE)
-    symptom = models.TextField()
+    symptom = models.TextField(choices=MadrsSelfSymptoms.sequence())
     item_string = models.TextField()
     item_index = models.IntegerField()
     min_score = models.IntegerField()

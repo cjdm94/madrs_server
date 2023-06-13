@@ -26,13 +26,12 @@ def create_madrs_self_patient_submission(request):
     serializer.is_valid(raise_exception=True)
     patient_id = serializer.data.get('patient_id')
 
-    submission = MadrsSelfSubmission(id=None, patient_id=patient_id)
+    submission = MadrsSelfSubmission(id=None, patient_id=patient_id, responses=None)
     submissionId = MadrsSelfSubmissionRepo().create(submission)
 
     return JsonResponse(data={ "submissionId": submissionId }, safe=False)
 
 @api_view(['POST'])
-# todo: serializer is stripping charfields
 def add_madrs_self_patient_submission_response(request):
     serializer = AddMadrsSelfPatientSubmissionSerializer(
         data={
