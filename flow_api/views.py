@@ -18,7 +18,7 @@ def create_madrs_self_patient_submission(request):
         submission = MadrsSelfSubmission(
             id=None, patient_id=patient_id, responses=None)
         submissionId = MadrsSelfSubmissionRepo().create(submission)
-        return JsonResponse(data={"submissionId": submissionId}, safe=False)
+        return JsonResponse(data={"submission_id": submissionId}, safe=False)
     except Exception as e:
         return JsonResponse(data={'error': e.args}, status=500)
 
@@ -56,7 +56,7 @@ def add_madrs_self_patient_submission_response(request):
         submission.add_response(response)
         created = MadrsSelfResponseRepo().create(response, submission)
 
-        return JsonResponse(data={'responseId': created.id}, safe=False)
+        return JsonResponse(data={'response_id': created.id}, safe=False)
     except Exception as e:
         return JsonResponse(data={'error': e.args}, status=500)
 
@@ -115,19 +115,21 @@ def patients_historical_madrs_self_submissions(request):
         submissions_by_patient = submission_repo.get_all_grouped_by_patient()
         patient_submission_summaries = [
             {
-                'submissionId': s.id,
-                'patientId': s.patient_id,
-                'totalScore': s.total_score(),
-                'severity': s.depression_severity().value
+                'submission_id': s.id,
+                'patient_id': s.patient_id,
+                'total_items': s.total_items,
+                'items_completed': len(s.responses),
+                'total_score': s.total_score(),
+                'severity': s.depression_severity().value,
             } for s in submissions_by_patient
         ]
 
         # AHA! I should be storing the total score in the Submission table. Storage cheaper than computation!! Doh.
         # Then we could do both these in the data layer - more efficient than computing score, filtering and sorting, every time
         filtered_by_total_score = [
-            s for s in patient_submission_summaries if min_total_score <= s['totalScore'] <= max_total_score]
+            s for s in patient_submission_summaries if min_total_score <= s['total_score'] <= max_total_score]
         sorted_by_total_score = sorted(
-            filtered_by_total_score, key=lambda d: d['totalScore'])
+            filtered_by_total_score, key=lambda d: d['total_score'])
 
         return JsonResponse(data={'data': sorted_by_total_score})
     except Exception as e:

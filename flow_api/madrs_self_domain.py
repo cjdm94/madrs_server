@@ -41,6 +41,7 @@ class MadrsSelfSeverityCategories(Enum):
     MILD_DEPRESSION = 'MILD_DEPRESSION'
     MODERATE_DEPRESSION = 'MODERATE_DEPRESSION'
     SEVERE_DEPRESSION = 'SEVERE_DEPRESSION'
+    UNDETERMINED = 'UNDETERMINED'
 
 
 class MadrsSelfSubmissionResponse:
@@ -98,6 +99,9 @@ class MadrsSelfSubmission:
         return sum(r.score for r in self.responses)
 
     def depression_severity(self):
+        if len(self.responses) < self.total_items:
+            return MadrsSelfSeverityCategories.UNDETERMINED
+
         total_score = self.total_score()
         if total_score < self.min_total_score or total_score > self.max_total_score:
             raise Exception("Invalid Madrs-s total score: %d" % total_score)
