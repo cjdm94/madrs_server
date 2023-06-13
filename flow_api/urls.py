@@ -31,7 +31,7 @@ urlpatterns = [
     path('patient/<int:patient_id>/madrs-self/submissions/mean-scores', views.patient_historical_madrs_self_mean_scores),
     
     # GET mean for each question across all submissions by all patients
-    path('patients/madrs-self/submissions/mean-scores', views.patients_historical_madrs_self_submissions),
+    path('patients/madrs-self/submissions/mean-scores', views.patients_historical_madrs_self_mean_scores),
     
     # GET all patients who responded with a certain score on a certain question (query string)
     path('patients/madrs-self', views.filter_patients_by_madrs_self_question_score),

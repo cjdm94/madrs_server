@@ -10,6 +10,9 @@ class AddMadrsSelfPatientSubmissionSerializer(serializers.Serializer):
    item_string = serializers.CharField()
    score = serializers.IntegerField()
 
-class FilterPatientsByMadrsSelfSymptomScore(serializers.Serializer):
+class FilterPatientsByMadrsSelfSymptomScoreSerializer(serializers.Serializer):
    symptom = serializers.ChoiceField(MadrsSelfSymptoms.sequence())
    score = serializers.IntegerField()
+
+class GetPatientHistoricalMadrsSelfMeanSymptomScoresSerializer(serializers.Serializer):
+   patient_id = serializers.IntegerField()

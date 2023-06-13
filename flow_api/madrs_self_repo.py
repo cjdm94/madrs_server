@@ -1,5 +1,6 @@
 from .madrs_self_domain import MadrsSelfSubmission, MadrsSelfSubmissionResponse, MadrsSelfSymptoms
 from .models import DiagnosticQuestionnaireSubmission, DiagnosticQuestionnaireSubmissionResponse
+from django.db.models import Avg
 
 def madrs_self_submission_response(diagnostic_questionnaire_response):
     return MadrsSelfSubmissionResponse(
@@ -74,3 +75,12 @@ class MadrsSelfResponseRepo:
         responses = self.model.objects.filter(symptom=symptom, patient_score=score).values_list('patient_id', flat=True).distinct()
         return [{ 'patient_id': r } for r in responses]
         
+    def get_patient_historical_mean_all_symptoms(self, patient_id):
+        responses = self.model.objects.annotate(mean_score=Avg('patient_score')).filter(patient_id=patient_id).order_by('patient_id', 'patient_score')
+        return [{ 'symptom': r.symptom, 'mean_score': r.mean_score } for r in responses]
+
+    # *I think this is average by observation, not average by patient (avg of avg)
+    def get_historical_mean_all_symptoms_all_patients(self):
+        responses = self.model.objects.annotate(mean_score=Avg('patient_score')).order_by('symptom')
+        return [{ 'symptom': r.symptom, 'mean_score': r.mean_score } for r in responses]
+

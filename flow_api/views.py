@@ -3,20 +3,7 @@ from rest_framework.decorators import api_view
 import datetime
 from .madrs_self_domain import MadrsSelfSubmission, MadrsSelfSubmissionResponse
 from .madrs_self_repo import MadrsSelfSubmissionRepo, MadrsSelfResponseRepo
-from .madrs_self_api import CreateMadrsSelfPatientSubmissionSerializer, AddMadrsSelfPatientSubmissionSerializer, FilterPatientsByMadrsSelfSymptomScore
-
-mock_madrs_self_mean_scores = {
-    'q1': 3,
-    'q2': 4,
-    'q3': 5,
-    'q4': 3,
-    'q5': 4,
-    'q6': 5,
-    'q7': 3,
-    'q8': 4,
-    'q9': 6,
-    'q10': 1
-}
+from .madrs_self_api import CreateMadrsSelfPatientSubmissionSerializer, AddMadrsSelfPatientSubmissionSerializer, FilterPatientsByMadrsSelfSymptomScoreSerializer, GetPatientHistoricalMadrsSelfMeanSymptomScoresSerializer
 
 @api_view(['POST'])
 def create_madrs_self_patient_submission(request):
@@ -69,59 +56,42 @@ def add_madrs_self_patient_submission_response(request):
 # for a given patient, get mean for each question across all their submissions
 @api_view(['GET'])
 def patient_historical_madrs_self_mean_scores(request, patient_id):
-    # do this with a single sql query
-    return JsonResponse(data={
-        "count": 1,
-        "data": { 
-            "patientId": patient_id, 
-            "historical_mean_scores": mock_madrs_self_mean_scores 
-        }
-    })
+    serializer = GetPatientHistoricalMadrsSelfMeanSymptomScoresSerializer(
+        data={'patient_id': patient_id}
+    )
+    serializer.is_valid(raise_exception=True)
+    patient_id = serializer.data.get('patient_id')
+    
+    try:
+        response_repo = MadrsSelfResponseRepo()
+        mean_score_by_symptom = response_repo.get_patient_historical_mean_all_symptoms(patient_id=patient_id)
+        return JsonResponse(data={ 'data': {
+            'patient_id': patient_id,
+            'historical_mean_scores': mean_score_by_symptom 
+        } })
+    except Exception as e:
+        return JsonResponse(data={ 'error': e.args }, status=500)
 
 # get mean for each question across all submissions by all patients
 @api_view(['GET'])
 def patients_historical_madrs_self_mean_scores(request):
-    # do this with a single sql query
-    return JsonResponse(data={
-        "count": 3,
-        "data": [
-            { "patientId": 1, "historical_mean_scores": mock_madrs_self_mean_scores },
-            { "patientId": 2, "historical_mean_scores": mock_madrs_self_mean_scores },
-            { "patientId": 3, "historical_mean_scores": mock_madrs_self_mean_scores },
-        ]
-    })
+    try:
+        response_repo = MadrsSelfResponseRepo()
+        mean_score_by_symptom = response_repo.get_historical_mean_all_symptoms_all_patients()
+        return JsonResponse(data={ 'data': mean_score_by_symptom })
+    except Exception as e:
+        return JsonResponse(data={ 'error': e.args }, status=500)
 
 # all patients, with each of their submissions, each with a total score and depression severity
 # sorted by total score and with the option to filter on a minimum and/or maximum total score
 @api_view(['GET'])
 def patients_historical_madrs_self_submissions(request):
-    # get all patients with submissions 
-    # for each diagnostic_questionnaire_submission, map to a madrs_self_submission, computing total score and depression severity 
-    # return here
-    return JsonResponse(data={
-        "count": 1,
-        "filters": [ 
-            { "minTotalScore": request.query_params.get('minTotalScore') or 0 }, 
-            { "maxTotalScore": request.query_params.get('maxTotalScore') or 60 } 
-        ],
-        "data": [
-            { 
-                "patientId": 1, 
-                "submissions": [ 
-                    { 
-                        "completedAt": datetime.date.today(),
-                        "total_score": 30, 
-                        "depression_severity": "SEVERE_DEPRESSION" 
-                    } 
-                ] 
-            },
-        ]
-    })
+    return JsonResponse(data={ "count": 0 })
 
 # all patients who responded with a certain score on a certain question
 @api_view(['GET'])
 def filter_patients_by_madrs_self_question_score(request):
-    serializer = FilterPatientsByMadrsSelfSymptomScore(
+    serializer = FilterPatientsByMadrsSelfSymptomScoreSerializer(
         data={
             'symptom': request.query_params.get('symptom'),
             'score': request.query_params.get('score'),
@@ -140,7 +110,7 @@ def filter_patients_by_madrs_self_question_score(request):
         )
         return JsonResponse(data={ 
             'count': len(patients),
-            'patients': patients,
+            'data': patients,
             'filters': [
                 { 'symptom': symptom },
                 { 'score': score }
