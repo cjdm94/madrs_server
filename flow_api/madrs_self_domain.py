@@ -1,4 +1,4 @@
-from common import DiagnosticQuestionnaireType
+from .common import DiagnosticQuestionnaireType
 import uuid
 from enum import Enum
 

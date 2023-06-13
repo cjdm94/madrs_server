@@ -69,4 +69,8 @@ class MadrsSelfResponseRepo:
         )
         created.save()
         return madrs_self_submission_response(created)
-
+    
+    def filter_patients_with_symptom_score(self, symptom, score):
+        responses = self.model.objects.filter(symptom=symptom, patient_score=score).values_list('patient_id', flat=True).distinct()
+        return [{ 'patient_id': r } for r in responses]
+        

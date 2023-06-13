@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 import datetime
 from .madrs_self_domain import MadrsSelfSubmission, MadrsSelfSubmissionResponse
 from .madrs_self_repo import MadrsSelfSubmissionRepo, MadrsSelfResponseRepo
-from .madrs_self_api import CreateMadrsSelfPatientSubmissionSerializer, AddMadrsSelfPatientSubmissionSerializer
+from .madrs_self_api import CreateMadrsSelfPatientSubmissionSerializer, AddMadrsSelfPatientSubmissionSerializer, FilterPatientsByMadrsSelfSymptomScore
 
 mock_madrs_self_mean_scores = {
     'q1': 3,
@@ -121,12 +121,30 @@ def patients_historical_madrs_self_submissions(request):
 # all patients who responded with a certain score on a certain question
 @api_view(['GET'])
 def filter_patients_by_madrs_self_question_score(request):
-    # do this with a single sql query - need to define the madrs_self_question enum in order to filter
-    return JsonResponse(data={
-        "count": 3,
-        "filters": [ { "test": 4 } ],
-        "data": [
-            { "patientId": 2 },
-            { "patientId": 3 },
-        ]
-    })
+    serializer = FilterPatientsByMadrsSelfSymptomScore(
+        data={
+            'symptom': request.query_params.get('symptom'),
+            'score': request.query_params.get('score'),
+        }
+    )
+    serializer.is_valid(raise_exception=True)
+    
+    try:
+        symptom = serializer.data.get('symptom')
+        score = serializer.data.get('score')
+
+        response_repo = MadrsSelfResponseRepo()
+        patients = response_repo.filter_patients_with_symptom_score(
+            symptom=symptom,
+            score=score,
+        )
+        return JsonResponse(data={ 
+            'count': len(patients),
+            'patients': patients,
+            'filters': [
+                { 'symptom': symptom },
+                { 'score': score }
+            ],
+        })
+    except Exception as e:
+        return JsonResponse(data={ 'error': e.args }, status=500)
