@@ -114,8 +114,11 @@ Thank you guys - I enjoyed this and I really learned a lot, it was truly a Djang
 
 ### Setup Instructions
 
+- Install the usual suspects: `python` (I have 3.9.6 in my venv), `django` (4.2.2) etc.
+- Install project dependencies (actually, how the f do we do this? XD) 
 - Create new migrations following changes to models: `python manage.py makemigrations`
 - Apply migrations: `python manage.py migrate`
 - Tests (from the root): `python manage.py test flow_api`
+- Run server: `python manage.py runserver`
 
 (update: oh my god, I have only just got the VSCode Python autolinting working. i have been living in the dark. i hate myself lol)
