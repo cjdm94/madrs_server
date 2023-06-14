@@ -1,0 +1,161 @@
+{
+	"info": {
+		"_postman_id": "5991c0f7-76f2-445b-a907-a3ca3c3cbafc",
+		"name": "flow-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1_post-submission",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"patientId\": 1 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/mdrs-self/submission",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"mdrs-self",
+						"submission"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2_post-submission-response",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"submissionId\": \"\", \"symptom\": \"MOOD\", \"itemString\": \"mood string\", \"score\": 5 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/mdrs-self/submission/response",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"mdrs-self",
+						"submission",
+						"response"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3_get-patients-by-symptom-score",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/patients/madrs-self?symptom=MOOD&score=5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"patients",
+						"madrs-self"
+					],
+					"query": [
+						{
+							"key": "symptom",
+							"value": "MOOD"
+						},
+						{
+							"key": "score",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4_get-patients-submissions",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/patients/madrs-self/submissions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"patients",
+						"madrs-self",
+						"submissions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5_get_submission_summaries",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/patient/1/madrs-self/submissions/mean-scores",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"patient",
+						"1",
+						"madrs-self",
+						"submissions",
+						"mean-scores"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
